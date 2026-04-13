@@ -1,7 +1,6 @@
 require('dotenv').config();
 const express = require('express');
 const cors    = require('cors');
-const path    = require('path');
 
 const app = express();
 
@@ -9,9 +8,6 @@ const app = express();
 app.use(cors({ origin: '*' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
-// ── Serve frontend static files ──────────────────────────────
-app.use(express.static(path.join(__dirname, '../frontend/public')));
 
 // ── API Routes ───────────────────────────────────────────────
 app.use('/api/auth',     require('./routes/auth'));
@@ -21,14 +17,18 @@ app.use('/api/admin',    require('./routes/admin'));
 
 // ── Health check ─────────────────────────────────────────────
 app.get('/api/health', (req, res) =>
-  res.json({ status: 'ok', project: 'ExamFlow', course: 'CSS 2212' }));
+  res.json({ status: 'ok', project: 'ExamFlow', course: 'CSS 2212' })
+);
 
-// ── Catch-all: serve frontend for any non-API route ──────────
-app.get('*', (req, res) =>
-  res.sendFile(path.join(__dirname, '../frontend/public/index.html')));
+// ── Root route (so browser doesn't crash) ─────────────────────
+app.get('/', (req, res) => {
+  res.send('🚀 ExamFlow Backend is running');
+});
 
 // ── 404 for unknown API routes ────────────────────────────────
-app.use('/api', (req, res) => res.status(404).json({ error: 'API route not found' }));
+app.use('/api', (req, res) => {
+  res.status(404).json({ error: 'API route not found' });
+});
 
 // ── Global error handler ──────────────────────────────────────
 app.use((err, req, res, next) => {
@@ -39,6 +39,5 @@ app.use((err, req, res, next) => {
 // ── Start server ─────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n🚀  ExamFlow running at http://localhost:${PORT}`);
-  console.log(`📋  CSS 2212 — Database Systems Lab | MIT Bengaluru\n`);
+  console.log(`🚀 ExamFlow running on port ${PORT}`);
 });
